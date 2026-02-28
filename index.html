@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Papatya Falı</title>
+    <style>
+        :root {
+            --petal-color: #ffffff;
+            --center-color: #ffeb3b;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background: #f0f9ff;
+            color: #333;
+            text-align: center;
+        }
+
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        h1 { color: #2d5a27; margin-bottom: 1rem; }
+        
+        input {
+            padding: 10px;
+            width: 60px;
+            border: 2px solid #81c784;
+            border-radius: 8px;
+            font-size: 1rem;
+            text-align: center;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 10px;
+            transition: transform 0.2s;
+        }
+
+        button:hover { transform: scale(1.05); background: #43a047; }
+
+        #game-screen { display: none; position: relative; }
+
+        .flower-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 50px auto;
+        }
+
+        .flower-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 50px;
+            height: 50px;
+            background: var(--center-color);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .petal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 30px;
+            height: 70px;
+            background: var(--petal-color);
+            border-radius: 50% 50% 20% 20%;
+            border: 1px solid #eee;
+            transform-origin: bottom center;
+            cursor: pointer;
+            transition: all 0.5s ease;
+        }
+
+        .petal:hover { filter: brightness(0.95); }
+
+        .petal.plucked {
+            transform: translateY(-200px) rotate(45deg) scale(0);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #message {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #e91e63;
+            height: 2rem;
+            margin-top: 20px;
+        }
+
+        .final-message {
+            font-size: 1.2rem;
+            color: #2e7d32;
+            line-height: 1.6;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="setup-screen">
+        <h1>🌼 Papatya Falı</h1>
+        <p>Yaprak sayısını seç kuzum:</p>
+        <input type="number" id="petal-count" min="1" max="24" value="8">
+        <br>
+        <button onclick="startGame()">Hazırım!</button>
+    </div>
+
+    <div class="container" id="game-screen">
+        <div id="message"></div>
+        <div class="flower-container" id="flower">
+            <div class="flower-center"></div>
+        </div>
+        <p id="instruction">Yapraklara tıklayarak koparabilirsin...</p>
+        <div id="final-box" class="final-message">
+            sevmio diye bi şey yok kuzum tmm, seni seviyorum canımın içi 
+        </div>
+        <button id="reset-btn" style="display:none" onclick="location.reload()">Tekrar Oyna</button>
+    </div>
+
+    <script>
+        let totalPetals = 0;
+        let pluckedCount = 0;
+        
+        
+        const loveMessages = [
+            "Çok sevio",
+            "Aşırı sevio",
+            "Baya sevio",
+            "Sevio sevio",
+            "Hep sevio",
+            "Deliler gibi sevio",
+            "Sonsuza kadar sevio",
+            "Canından çok sevio",
+            "Dünyalar kadar sevio"
+        ];
+
+        function startGame() {
+            const countInput = document.getElementById('petal-count');
+            const count = countInput.value;
+            
+            if (count < 1) return alert("En az 1 yaprak olmalı!");
+            
+            totalPetals = parseInt(count);
+            document.getElementById('setup-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'block';
+            
+            createFlower(totalPetals);
+        }
+
+        function createFlower(num) {
+            const flower = document.getElementById('flower');
+            for (let i = 0; i < num; i++) {
+                const petal = document.createElement('div');
+                petal.className = 'petal';
+                const angle = (360 / num) * i;
+                
+                petal.style.transform = `translate(-50%, -100%) rotate(${angle}deg)`;
+                
+                petal.onclick = function() {
+                    if (!this.style.opacity || this.style.opacity !== "0") {
+                        this.style.transform += " translateY(-150px) rotate(45deg) scale(0)";
+                        this.style.opacity = "0";
+                        this.style.pointerEvents = "none";
+                        pluckedCount++;
+                        updateGame();
+                    }
+                };
+                flower.appendChild(petal);
+            }
+        }
+
+        function updateGame() {
+            const messageDiv = document.getElementById('message');
+            
+            if (pluckedCount < totalPetals) {
+                
+                const randomMsg = loveMessages[Math.floor(Math.random() * loveMessages.length)];
+                messageDiv.innerText = randomMsg;
+            } else {
+                
+                messageDiv.style.display = 'none';
+                document.getElementById('instruction').style.display = 'none';
+                document.getElementById('final-box').style.display = 'block';
+                document.getElementById('reset-btn').style.display = 'inline-block';
+            }
+        }
+    </script>
+</body>
+</html>
